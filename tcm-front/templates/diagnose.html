@@ -1,0 +1,76 @@
+{{template "base" .}}
+
+{{define "content" }}
+    <h1>ChatTCM Welcome-中医小聪</h1>
+
+    <div id="chat">
+        <div id="messages">
+            <div class="message">欢迎使用中医小聪，您可以输入您最近的症状，我将为您进行诊断。（为了保证识别准确率，请尽量用词组描述，并使用逗号分隔不同的症状）</div>
+        </div>
+        <div id="input">
+            <input id="message-input" type="text" placeholder="请在这输入您的症状">
+            <button id="send-button">输入</button>
+        </div>
+    </div>
+
+{{end}}
+
+{{define "js"}}
+<script>
+    // Connect to the chat WebSocket server
+    const socket = new WebSocket("ws://127.0.0.1:8080/chat");
+
+    // Handle incoming messages from the WebSocket
+    socket.onmessage = function(event) {
+        const message = JSON.parse(event.data);
+        displayMessage(message);
+    };
+
+    // Send a message to the WebSocket
+    function sendMessage() {
+        const input = document.getElementById('message-input');
+        const message = input.value;
+
+        if (message.trim() !== '') {
+            const outgoingMessage = {
+                type: 'message',
+                text: message
+            };
+
+            socket.send(JSON.stringify(outgoingMessage));
+            input.value = '';
+
+            // Create a new message element for the input message
+            const messages = document.getElementById('messages');
+            const messageContainer = document.createElement('div');
+            messageContainer.classList.add('message', 'outgoing');
+            const messageText = document.createTextNode(message);
+            messageContainer.appendChild(messageText);
+            messages.appendChild(messageContainer);
+        }
+    }
+
+    // Handle the Send button click event
+    const sendButton = document.getElementById('send-button');
+    sendButton.addEventListener('click', sendMessage);
+
+    // Handle the Enter key press event
+    const messageInput = document.getElementById('message-input');
+    messageInput.addEventListener('keydown', function(event) {
+        if (event.key === 'Enter') {
+            sendMessage();
+        }
+    });
+
+    // Display an incoming message in the chat window
+    function displayMessage(message) {
+        const messages = document.getElementById('messages');
+        const messageContainer = document.createElement('div');
+        messageContainer.classList.add('message', 'incoming');
+        const messageText = document.createTextNode(message.text);
+        messageContainer.appendChild(messageText);
+        messages.appendChild(messageContainer);
+    }
+
+</script>
+{{end}}

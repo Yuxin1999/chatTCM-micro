@@ -1,0 +1,89 @@
+{{template "base" .}}
+
+{{define "content" }}
+<form id="register-form">
+    <label for="username">用户名：</label>
+    <input type="text" id="username" name="username"><br>
+    <label for="password">密码：</label>
+    <input type="password" id="password" name="password"><br>
+    <label for="email">邮箱：</label>
+    <input type="email" id="email" name="email"><br>
+    <button type="submit" id="register-btn">注册</button>
+</form>
+
+<div id="verification-code-container" style="display: none;">
+    <label for="verification-code">验证码：</label>
+    <input type="text" id="verification-code" name="verification-code"><br>
+    <button type="button" id="verify-btn">验证</button>
+</div>
+
+<div id="success-container" style="display: none;">
+    <p>请查收您的邮箱获取验证码!</p>
+</div>
+
+<div id="verify-success-container" style="display: none;">
+    <p>验证成功！</p>
+</div>
+
+{{end}}
+
+{{define "js"}}
+<script>
+    const registerForm = document.getElementById('register-form');
+    const registerBtn = document.getElementById('register-btn');
+    const verificationCodeContainer = document.getElementById('verification-code-container');
+    const verifyBtn = document.getElementById('verify-btn');
+    const successContainer = document.getElementById('success-container');
+    const verifySuccessContainer = document.getElementById('verify-success-container');
+
+    registerForm.addEventListener('submit', event => {
+        event.preventDefault();
+        const formData = new FormData(registerForm);
+
+        fetch('/signup', {
+            method: 'POST',
+            body: formData
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    successContainer.style.display = 'block';
+                    verificationCodeContainer.style.display = 'block';
+                } else {
+                    alert(data.message);
+                }
+            })
+            .catch(error => {
+                console.error(error);
+                alert('注册失败，请稍后再试。');
+            });
+    });
+
+    verifyBtn.addEventListener('click', () => {
+        const verificationCode = document.getElementById('verification-code').value;
+
+        fetch('/verify', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                verificationCode
+            })
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    verifySuccessContainer.style.display = 'block';
+                    window.location.href = '/';
+                } else {
+                    alert(data.message);
+                }
+            })
+            .catch(error => {
+                console.error(error);
+                alert('验证码验证失败，请稍后再试。');
+            });
+    });
+</script>
+{{ end }}

@@ -1,0 +1,22 @@
+{{template "base" .}}
+
+{{define "content" }}
+<div class="container">
+    <h2>ChatTCM-Welcome</h2>
+    <form action="/login" method="post">
+        <div class="form-control">
+            <label for="username">用户名</label>
+            <input type="text" id="username" name="username" placeholder="请输入用户名">
+        </div>
+        <div class="form-control">
+            <label for="password">密码</label>
+            <input type="password" id="password" name="password" placeholder="请输入密码">
+        </div>
+        <button type="submit" class="btn">登录</button>
+    </form>
+    <div class="register">
+        还没有账号？<a href="/sign">立即注册</a>
+    </div>
+</div>
+
+{{end}}
